@@ -3,15 +3,17 @@ import random
 
 
 CAR_GENERATION_PROBABILITY = 0.008
-CAR_VELOCITY = 0.2
+CAR_VELOCITY = 0.5
+TRAFIC_LIGHT_TIMER = 2000
+DISTANCE_TRAFIC_LIGHT = 25
 
 
 # Iniciando o pygame
 pygame.init()
 
-# Configuraçao da janela
 largura = 800
 altura = 600
+# Configuraçao da janela
 tela = pygame.display.set_mode((largura, altura)) # Tamanho da janela
 pygame.display.set_caption("Simulaçao Semáforos") # Nome da janela
 
@@ -37,28 +39,42 @@ class Rua:
             pygame.draw.rect(tela, branco, (self.x, self.y, self.largura, 50))
         if self.orientacao == 'vertical':
             pygame.draw.rect(tela, branco, (self.x, self.y, 50, self.altura))
+    
+    def atualizar_estatisticas(self):
+        self.carros_esperando = 0
+        for semaforo in self.semaforos:
+            self.carros_esperando += semaforo.carros_esperando
 
-
-class Semafaro:
+class Semaforo:
     def __init__(self, x, y, rua, estado=0):
         self.estado = 0 # 0 = vermelho, 1 = verde
         self.x = x
         self.y = y
         self.rua = rua
         self.estado = estado
+        self.timer = TRAFIC_LIGHT_TIMER
+        self.carros_esperando = 0
+        self.rate_carros = 0
 
     def desenhar_semaforo(self):
         if self.estado == 0:
             pygame.draw.circle(tela, (255, 0, 0), (self.x, self.y), 10)
         else:
             pygame.draw.circle(tela, (0, 255, 0), (self.x, self.y), 10)
+    
+    def atualizar_semaforo(self):
+        self.rua.atualizar_estatisticas()
+        self.timer -= 1
+        if self.timer == 0:
+            self.estado = 1 - self.estado
+            self.timer = TRAFIC_LIGHT_TIMER
         
 
 class Carro:
     def __init__(self, rua):
         # Variaveis proprias
         self.tempoParado = 0
-        self.velocidade = CAR_VELOCITY
+        self.velocidade = random.uniform(CAR_VELOCITY - 0.1, CAR_VELOCITY + 0.1)
         cor_carro =  (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) # Cor aleatória
         self.cor = cor_carro
 
@@ -84,19 +100,45 @@ class Carro:
     def desenhar_carro(self):
         pygame.draw.rect(tela, self.cor, (self.x, self.y, 20, 20))
 
-    def mover_carro(self):
-        if self.orientacao == 'horizontal':
-            self.x += self.velocidade
-        if self.orientacao == 'vertical':
-            self.y += self.velocidade
-    
+    def verificar_semaforos(self):
+        for semaforo in self.rua.semaforos:  
+            if self.orientacao == 'horizontal':
+                # Verifica se o carro está na posição correta para contar como esperando
+                if semaforo.estado == 0 and (semaforo.x - DISTANCE_TRAFIC_LIGHT <= self.x + 20 <= semaforo.x):
+                    if self.tempoParado == 0:
+                        semaforo.carros_esperando += 1
+                    self.tempoParado += 1
+                    return False
+            if self.orientacao == 'vertical':
+                # Verifica se o carro está na posição correta para contar como esperando
+                if semaforo.estado == 0 and (semaforo.y - DISTANCE_TRAFIC_LIGHT <= self.y + 20 <= semaforo.y):
+                    if self.tempoParado == 0:
+                        semaforo.carros_esperando += 1
+                    self.tempoParado += 1
+                    return False
+        if self.tempoParado > 0:
+            for semaforo in self.rua.semaforos:
+                if self.orientacao == 'horizontal' and (semaforo.x - DISTANCE_TRAFIC_LIGHT <= self.x + 20 <= semaforo.x):
+                    semaforo.carros_esperando -= 1
+                if self.orientacao == 'vertical' and (semaforo.y - DISTANCE_TRAFIC_LIGHT <= self.y + 20 <= semaforo.y):
+                    semaforo.carros_esperando -= 1
+            self.tempoParado = 0
+        return True
 
+
+    def mover_carro(self):
+        if self.verificar_semaforos():
+            if self.orientacao == 'horizontal':
+                self.x += self.velocidade
+            if self.orientacao == 'vertical':
+                self.y += self.velocidade
+
+    
 
 class interConexao:
     def __init__(self, rua1, rua2):
         self.rua1 = rua1
         self.rua2 = rua2
-
         #localizaçao da interconexão
         if rua1.orientacao == 'horizontal' and rua2.orientacao == 'vertical':
             self.x = rua2.x
@@ -107,12 +149,13 @@ class interConexao:
 
         # apendSemaforosRua - fazer com que o semaforo seja adicionado a rua ou alguma forma da rua ter conhecimento das suas interconexoes
         if(self.rua1.orientacao == 'horizontal'):
-            self.semaforo = Semafaro(self.x-30, self.y+65, self.rua1)
+            self.semaforo = Semaforo(self.x-30, self.y+65, self.rua1)
         else:
-            self.semaforo = Semafaro(self.x+65, self.y-30, self.rua2, 1)
+            self.semaforo = Semaforo(self.x+65, self.y-30, self.rua1, 1)
         
-        #adiciona semaforo a rua
+        #adiciona semaforo a rua         
         self.rua1.semaforos.append(self.semaforo)
+
 
 # Classe para exibir estatísticas
 class displayEstatisticas:
@@ -172,7 +215,7 @@ rua4 = Rua(0, 400, largura, 50, 'horizontal')
 
 
 carros = []
-ruas = [rua1, rua2, rua3, rua4]
+ruas = [rua1, rua2, rua3]
 interconexoes = []
 
 # Calcula com base em todas as ruas onde tem conexao entre elas e salva em uma classe conexao
@@ -182,10 +225,11 @@ def verificarInterconexoesRuas():
             #verifica se as ruas são diferentes e se são perpendiculares
             if (rua != rua2) and ((rua.orientacao == 'horizontal' and rua2.orientacao == 'vertical') or(rua.orientacao == 'vertical' and rua2.orientacao == 'horizontal')):
                 print('Conexao encontrada')
-                interconexoes.append(interConexao(rua, rua2))                   
+                interconexoes.append(interConexao(rua, rua2))          
                 
-
 verificarInterconexoesRuas()
+
+
 displayEstatisticas = displayEstatisticas(ruas)
 grafico = Grafico([rua1, rua2], largura, altura)
 
@@ -200,6 +244,7 @@ while running:
     # Desenha as ruas
     for rua in ruas:
         rua.desenhar_rua()
+    
 
     #gerando carros aleatoriamente
     if random.random() < CAR_GENERATION_PROBABILITY:
@@ -209,6 +254,7 @@ while running:
 
     #desenhando semaforos das interconexoes
     for intercon in interconexoes:
+        intercon.semaforo.atualizar_semaforo()
         intercon.semaforo.desenhar_semaforo()
 
 
@@ -222,6 +268,7 @@ while running:
         if carro.orientacao == 'vertical':
             if carro.y > altura:
                 carro.remover_carro()
+
 
     #desenhando estatisticas
     displayEstatisticas.desenhar_estatisticas()
