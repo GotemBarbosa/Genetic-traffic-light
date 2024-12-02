@@ -18,10 +18,13 @@ tela = pygame.display.set_mode((largura, altura)) # Tamanho da janela
 pygame.display.set_caption("Simulaçao Semáforos") # Nome da janela
 
 branco = (255, 255, 255)
+cinza = (200, 200, 200)
+verde = (51, 204, 51)
 
+interconexoes_area = []
 
 class Rua:
-    def __init__(self, x, y, largura, altura, orientacao):
+    def __init__(self, x, y, largura, altura, orientacao, interseccao=None):
         self.x = x
         self.y = y
         self.largura = largura
@@ -32,13 +35,53 @@ class Rua:
         self.carros_transitando = 0
         self.semaforos = [] #Semaforos que serao adicionados pela classe interconexao
         self.carros = [] #Carros que serao adicionados pela classe carro
+
+        self.interseccao = interseccao  # Ponto de interseção (x, y) se houver
         
 
     def desenhar_rua(self):
+        # Define as cores
+        cor_rua = (50, 50, 50)          # Cinza para a rua
+        cor_borda = (255, 255, 255)    # Branco para a borda
+        cor_linha = (255, 255, 255)    # Branco para as linhas de trânsito
+        
+        # Desenha a rua principal
+        pygame.draw.rect(tela, cor_rua, (self.x, self.y, self.largura, self.altura))
+        
+        # Desenha a borda branca ao redor da rua
+        pygame.draw.rect(tela, cor_borda, (self.x, self.y, self.largura, self.altura), 2)
+        
+        # Desenhar linhas brancas na rua
         if self.orientacao == 'horizontal':
-            pygame.draw.rect(tela, branco, (self.x, self.y, self.largura, 50))
-        if self.orientacao == 'vertical':
-            pygame.draw.rect(tela, branco, (self.x, self.y, 50, self.altura))
+            for i in range(self.x, self.x + self.largura, 70):
+                linha = pygame.Rect(i, self.y + self.altura // 2 - 1, 20, 2)
+                # Verifica se a linha está dentro de alguma interconexão ou interseção
+                pular_linha = False
+                if self.interseccao:
+                    ix, iy = self.interseccao
+                    if ix - self.largura // 2 <= i <= ix + self.largura // 2:
+                        pular_linha = True
+                if any(inter_area.colliderect(linha) for inter_area in interconexoes_area):
+                    pular_linha = True
+                if not pular_linha:
+                    pygame.draw.line(tela, cor_linha,
+                                    (i, self.y + self.altura // 2),
+                                    (i + 20, self.y + self.altura // 2), 2)
+        elif self.orientacao == 'vertical':
+            for i in range(self.y, self.y + self.altura, 40):
+                linha = pygame.Rect(self.x + self.largura // 2 - 1, i, 2, 20)
+                # Verifica se a linha está dentro de alguma interconexão ou interseção
+                pular_linha = False
+                if self.interseccao:
+                    ix, iy = self.interseccao
+                    if iy - self.altura // 2 <= i <= iy + self.altura // 2:
+                        pular_linha = True
+                if any(inter_area.colliderect(linha) for inter_area in interconexoes_area):
+                    pular_linha = True
+                if not pular_linha:
+                    pygame.draw.line(tela, cor_linha,
+                                    (self.x + self.largura // 2, i),
+                                    (self.x + self.largura // 2, i + 20), 2)
     
     def atualizar_estatisticas(self):
         self.carros_esperando = 0
@@ -57,10 +100,49 @@ class Semaforo:
         self.rate_carros = 0
 
     def desenhar_semaforo(self):
-        if self.estado == 0:
-            pygame.draw.circle(tela, (255, 0, 0), (self.x, self.y), 10)
-        else:
-            pygame.draw.circle(tela, (0, 255, 0), (self.x, self.y), 10)
+        # Cores
+        cor_corpo = (50, 50, 50)         # Corpo do semáforo (cinza escuro)
+        cor_borda = (0, 0, 0)            # Borda das luzes (preto)
+        cor_luz_desligada = (30, 30, 30) # Luz desligada (cinza mais escuro)
+
+        # Dimensões do semáforo
+        largura_corpo = 20
+        altura_corpo = 40
+        raio_luz = 8
+        espaco_entre_luzes = 2
+
+        # Posição do corpo do semáforo
+        corpo_x = self.x - largura_corpo // 2
+        corpo_y = self.y - altura_corpo // 2
+
+        # Desenha o corpo do semáforo
+        pygame.draw.rect(tela, cor_corpo, (corpo_x, corpo_y, largura_corpo, altura_corpo), border_radius=5)
+
+        # Posições das luzes
+        luzes_y = [
+            corpo_y + espaco_entre_luzes + raio_luz,                              # Luz vermelha
+            corpo_y + altura_corpo - espaco_entre_luzes - raio_luz                # Luz verde
+        ]
+        luz_x = self.x
+
+        # Estados das luzes
+        if self.estado == 0:  # Vermelho
+            cor_vermelho = (255, 0, 0)
+            cor_verde = cor_luz_desligada
+        elif self.estado == 1:  # Verde
+            cor_vermelho = cor_luz_desligada
+            cor_verde = (0, 255, 0)
+        else:  # Todas apagadas
+            cor_vermelho = cor_luz_desligada
+            cor_verde = cor_luz_desligada
+
+        # Desenha as luzes
+        # Luz vermelha
+        pygame.draw.circle(tela, cor_vermelho, (luz_x, luzes_y[0]), raio_luz)
+        pygame.draw.circle(tela, cor_borda, (luz_x, luzes_y[0]), raio_luz, 1)
+        # Luz verde
+        pygame.draw.circle(tela, cor_verde, (luz_x, luzes_y[1]), raio_luz)
+        pygame.draw.circle(tela, cor_borda, (luz_x, luzes_y[1]), raio_luz, 1)
     
     def atualizar_semaforo(self):
         self.rua.atualizar_estatisticas()
@@ -98,7 +180,30 @@ class Carro:
             self.rua.carros_transitando -= 1
 
     def desenhar_carro(self):
-        pygame.draw.rect(tela, self.cor, (self.x, self.y, 20, 20))
+        altura_carro = 20
+        largura_carro = 30
+
+        if(self.orientacao == 'horizontal'):
+
+            pygame.draw.rect(tela, self.cor, (self.x, self.y, largura_carro, altura_carro))
+            #rodas retangulares
+            pygame.draw.rect(tela, (0, 0, 0), (self.x + 2, self.y - 1, 10, 2))
+            pygame.draw.rect(tela, (0, 0, 0), (self.x + 2, self.y + 19, 10, 2))
+            pygame.draw.rect(tela, (0, 0, 0), (self.x + 18, self.y - 1, 10, 2))
+            pygame.draw.rect(tela, (0, 0, 0), (self.x + 18, self.y + 19, 10, 2))
+
+            #janela retangular
+            pygame.draw.rect(tela, (255, 255, 255), (self.x + 15, self.y + 2, 5, 16))
+        else:
+            pygame.draw.rect(tela, self.cor, (self.x, self.y, altura_carro, largura_carro))
+            #rodas retangulares
+            pygame.draw.rect(tela, (0, 0, 0), (self.x - 1, self.y + 2, 2, 10))
+            pygame.draw.rect(tela, (0, 0, 0), (self.x + 19, self.y + 2, 2, 10))
+            pygame.draw.rect(tela, (0, 0, 0), (self.x - 1, self.y + 18, 2, 10))
+            pygame.draw.rect(tela, (0, 0, 0), (self.x + 19, self.y + 18, 2, 10))
+
+            #janela retangular
+            pygame.draw.rect(tela, (255, 255, 255), (self.x + 2, self.y + 15, 16, 5))
 
     def verificar_semaforos(self):
         for semaforo in self.rua.semaforos:  
@@ -147,14 +252,33 @@ class interConexao:
             self.x = rua1.x
             self.y = rua2.y
 
+        # Define o tamanho da área da interconexão
+        self.largura_area = 60  # Ajuste conforme necessário
+        self.altura_area = 60    # Ajuste conforme necessário
+
+        # Adiciona a área da interconexão à lista global
+        interconexoes_area.append(pygame.Rect(
+            self.x - self.largura_area // 2 + 12,
+            self.y - self.altura_area // 2 + 12,
+            self.largura_area,
+            self.altura_area
+        ))
+
         # apendSemaforosRua - fazer com que o semaforo seja adicionado a rua ou alguma forma da rua ter conhecimento das suas interconexoes
         if(self.rua1.orientacao == 'horizontal'):
-            self.semaforo = Semaforo(self.x-30, self.y+65, self.rua1)
+            self.semaforo = Semaforo(self.x-30, self.y+75, self.rua1)
         else:
-            self.semaforo = Semaforo(self.x+65, self.y-30, self.rua1, 1)
+            self.semaforo = Semaforo(self.x+65, self.y-50, self.rua1, 1)
         
         #adiciona semaforo a rua         
         self.rua1.semaforos.append(self.semaforo)
+
+    def desenhar_interconexao(self):
+        # Desenha o retângulo da interconexão sobrepondo as ruas
+        cor_interconexao = (50, 50, 50)  # Mesma cor da rua
+        pygame.draw.rect(tela, cor_interconexao, self.area_interconexao)
+        # Desenha a borda branca
+        pygame.draw.rect(tela, (255, 255, 255), self.area_interconexao, 2)
 
 
 # Classe para exibir estatísticas
@@ -239,7 +363,7 @@ while running:
             running = False
     
     # Preenche tela com preto
-    tela.fill((0, 0, 0))
+    tela.fill(verde)
 
     # Desenha as ruas
     for rua in ruas:
