@@ -28,10 +28,10 @@ class Individuo:
 
             rua1 = Rua(0, ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
             rua2 = Rua(LARGURA_TELA // 4 - 100, 0, 50, ALTURA_TELA, 'vertical')
-            rua3 = Rua(3 * LARGURA_TELA // 4 - 250, 0, 50, ALTURA_TELA, 'vertical')
-            rua4 = Rua(0, 3 * ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
+            # rua3 = Rua(3 * LARGURA_TELA // 4 - 250, 0, 50, ALTURA_TELA, 'vertical')
+            # rua4 = Rua(0, 3 * ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
 
-            self.ruas = [rua1, rua2, rua3, rua4]
+            self.ruas = [rua1, rua2]
 
             # Verificar interconexões entre as ruas
             self.verificar_interconexoes()
@@ -50,20 +50,6 @@ class Individuo:
                     ):
                         intercon = interConexao(rua, rua2)
                         self.interconexoes.append(intercon)
-    
-
-
-    def avaliar_fitness(self):
-        # Avaliar o fitness do indivíduo
-        pass
-
-    def mutacao(self):
-        # Realizar mutação no indivíduo
-        pass
-
-    def crossover(self, outro_individuo):
-        # Realizar crossover com outro indivíduo
-        pass
 
     def desenhar(self, tela):
         # Desenha as ruas do indivíduo
@@ -102,3 +88,17 @@ class Individuo:
             # Verificar se o carro saiu da tela e removê-lo
             if carro.x > LARGURA_TELA or carro.y > ALTURA_TELA:
                 carro.remover_carro()
+
+class Individuo_evol:
+    def __init__(self, num_semaforos):
+        self.open_time = [random.randint(0, 300) for _ in range(num_semaforos)] 
+        self.state = []
+        self.tempoAcumulado = [0]*num_semaforos
+        self.penalizacao = [0]*num_semaforos
+        self.fitness = 0
+        for i in range(num_semaforos):
+            self.state.append(0)
+        
+
+
+        

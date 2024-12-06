@@ -18,7 +18,9 @@ class DisplayEstatisticas:
         self.cor_borda = (255, 255, 255)
         self.padding = 8
 
-    def desenhar_estatisticas(self, tela):
+        self.melhor_fitness_geral = int(1e9)
+
+    def desenhar_estatisticas(self, tela, geracao, individuo_evol):
         largura_painel = 180  # Reduzir a largura do painel
         altura_painel = self.altura_tela
         x_painel = self.largura_tela - largura_painel
@@ -30,6 +32,22 @@ class DisplayEstatisticas:
         pygame.draw.rect(tela, self.cor_borda, painel_rect, 1)
 
         y_offset = y_painel + self.padding
+
+        geracao = self.fonte_titulo.render(f'Geração: {geracao}', True, self.cor_titulo)
+        tela.blit(geracao, (x_painel + self.padding, y_offset))
+        y_offset += geracao.get_height() + self.padding
+
+        fitness_melhor = individuo_evol.fitness
+        fitness_melhor_texto = self.fonte_texto.render(f'Melhor Fitness atual: {fitness_melhor:.2f}', True, self.cor_texto)
+        tela.blit(fitness_melhor_texto, (x_painel + self.padding, y_offset))
+        y_offset += fitness_melhor_texto.get_height() + self.padding
+
+        if(fitness_melhor < self.melhor_fitness_geral):
+            self.melhor_fitness_geral = fitness_melhor
+        
+        fitness_melhor_geral_texto = self.fonte_texto.render(f'Melhor fitness encontrado: {self.melhor_fitness_geral:.2f}', True, self.cor_texto)
+        tela.blit(fitness_melhor_geral_texto, (x_painel + self.padding, y_offset))
+        y_offset += fitness_melhor_geral_texto.get_height() + self.padding
 
         for index, rua in enumerate(self.ruas):
             # Título da rua
@@ -47,9 +65,14 @@ class DisplayEstatisticas:
             tela.blit(carros_esperando, (x_painel + self.padding + 5, y_offset))
             y_offset += carros_esperando.get_height() + self.padding
 
+            tempo = self.fonte_texto.render(f'Tempo aberto: {individuo_evol.open_time[index]}', True, self.cor_texto)
+            tela.blit(tempo, (x_painel + self.padding + 5, y_offset))
+            y_offset += tempo.get_height() + 2
+            
             # Linha divisória entre ruas
             pygame.draw.line(tela, (100, 100, 100), (x_painel + self.padding, y_offset), (x_painel + largura_painel - self.padding, y_offset))
             y_offset += self.padding
+
 
         # Espaço para adicionar mais estatísticas futuramente
 

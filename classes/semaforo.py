@@ -3,13 +3,13 @@ from classes.rua import Rua
 from config import TRAFIC_LIGHT_TIMER
 
 class Semaforo:
-    def __init__(self, x, y, rua, estado=0):
+    def __init__(self, x, y, rua, estado=0, initial_timer=TRAFIC_LIGHT_TIMER):
         self.estado = 0 # 0 = vermelho, 1 = verde
         self.x = x
         self.y = y
         self.rua = rua
         self.estado = estado
-        self.timer_clock = TRAFIC_LIGHT_TIMER #TEMPO QUE O SEMAFORO FICA EM CADA ESTADO
+        self.timer_clock = initial_timer #TEMPO QUE O SEMAFORO FICA EM CADA ESTADO
         self.timer = self.timer_clock #tempo atual dele ate mudar de estado
         self.carros_esperando = 0
         self.rate_carros = 0
