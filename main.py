@@ -31,54 +31,138 @@ def calcular_fitness(individuo_gen):
 
     for i in range(len(individuo_gen.tempoAcumulado)):
         fitness_tempo_acumulado += individuo_gen.tempoAcumulado[i]
-        fitness_penalizaçao += individuo_gen.penalizacao[i] * 2
+        fitness_penalizaçao += individuo_gen.penalizacao[i] * 2 # Peso maior para penalizações
+
 
     fitness_total = fitness_tempo_acumulado + fitness_penalizaçao
+
+    individuo_gen.fitness_total = fitness_total
+    individuo_gen.fitness_penalizacao = fitness_penalizaçao
+    individuo_gen.fitness_tempo_acumulado = fitness_tempo_acumulado
     
-    return fitness_total, fitness_penalizaçao, fitness_tempo_acumulado
+    return fitness_total
 
-def mutacao(individuo, fitness_tempo_acumulado, fitness_penalizaçao):
+# Função de seleção por torneio 
+def selecao_torneio(populacao, k=3):
+    torneio = random.sample(populacao, k)
+    torneio.sort(key=lambda x: x.fitness_total)
+    return torneio[0]
+
+
+def crossover_um_ponto(pai1, pai2):
+    ponto = random.randint(1, len(pai1.state) - 1)  # Escolhe um ponto de crossover
+
+    filho1 = Individuo_evol(len(pai1.state))
+    filho2 = Individuo_evol(len(pai1.state))
+
+    # Cópia dos genes até o ponto de crossover
+    filho1.state[:ponto] = pai1.state[:ponto]
+    filho1.open_time[:ponto] = pai1.open_time[:ponto]
+    filho2.state[:ponto] = pai2.state[:ponto]
+    filho2.open_time[:ponto] = pai2.open_time[:ponto]
+
+    # Troca dos genes a partir do ponto de crossover
+    filho1.state[ponto:] = pai2.state[ponto:]
+    filho1.open_time[ponto:] = pai2.open_time[ponto:]
+    filho2.state[ponto:] = pai1.state[ponto:]
+    filho2.open_time[ponto:] = pai1.open_time[ponto:]
+
+    return filho1, filho2
+
+def mutacao(individuo, mutation_rate=0.1, base_mutation_step=5, 
+           min_open_time=1, max_open_time=120,  # Ajuste conforme necessário
+           min_state=0, max_state=10):
+    
     for i in range(len(individuo.tempoAcumulado)):
-        if(fitness_tempo_acumulado == 0):
-            fitness_tempo_acumulado = 1
-        taxa_significancia_tempo = individuo.tempoAcumulado[i] / fitness_tempo_acumulado
-        if random.randint(0,1) < taxa_significancia_tempo:
-            individuo.open_time[i] += random.randint(int(-20*taxa_significancia_tempo), int(20*taxa_significancia_tempo))
+        # Mutação do open_time
+        if random.random() < mutation_rate:
+            delta_tempo = random.randint(-base_mutation_step, base_mutation_step)
+            individuo.open_time[i] += delta_tempo
+            # Garante que open_time esteja dentro dos limites
+            individuo.open_time[i] = max(min(individuo.open_time[i], max_open_time), min_open_time)
 
-        if(fitness_penalizaçao == 0):
-            fitness_penalizaçao = 1
-        taxa_significancia_penalizacao = individuo.penalizacao[i] / fitness_penalizaçao
-        if random.randint(0,1) < taxa_significancia_penalizacao:
-            individuo.state[i] += random.randint(int(-20*taxa_significancia_penalizacao), int(20*taxa_significancia_penalizacao))
-
+        # Mutação do state
+        if random.random() < mutation_rate:
+            delta_state = random.randint(-1, 1)
+            individuo.state[i] += delta_state
+            # Garante que state só seja 0 ou 1
+            individuo.state[i] = 1 if individuo.state[i] > 0 else 0
     return individuo
 
-# def elitismo(populacao, elite_size=1):
-#     populacao.sort(key=lambda x: calcular_fitness(x))
-#     return populacao[:elite_size]
+def elitismo(populacao, elite_size=1):
+    populacao_sorted = sorted(populacao, key=lambda x: x.fitness_total)
+    elites = populacao_sorted[:elite_size]
+    return elites
 
-def algoritmo_evolutivo(populacao_atual):
+def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1, 
+                        k_torneio=3, crossover_rate=0.8):
+    """
+    Executa uma geração do algoritmo evolutivo.
+
+    Parâmetros:
+        populacao_atual (list): Lista de indivíduos da geração atual.
+        elite_size (int): Número de indivíduos a serem mantidos como elites.
+        mutation_rate (float): Taxa de mutação para os indivíduos.
+        k_torneio (int): Número de indivíduos participantes do torneio.
+        crossover_rate (float): Probabilidade de realizar crossover.
+
+    Retorna:
+        melhor (Individuo_evol): O melhor indivíduo da nova geração.
+        nova_populacao (list): Lista de indivíduos da nova geração.
+    """
 
     # Avaliar fitness de todos os indivíduos
-    fitness_pop_tempoAcumulado = []
-    fitness_pop_penalizacao = []
     for individuo in populacao_atual:
-        fitness_ind, penalizacao, tempo_acumulado = calcular_fitness(individuo)
-        fitness_pop_penalizacao.append(penalizacao)
-        fitness_pop_tempoAcumulado.append(tempo_acumulado)
-        individuo.fitness = fitness_ind
+        calcular_fitness(individuo)
 
-    #ordena a populaçao atual pelo fitness
-    populacao_atual.sort(key=lambda x: calcular_fitness(x))
+    # Ordenar a população com base no fitness
+    populacao_atual.sort(key=lambda x: x.fitness_total)
     melhor = populacao_atual[0]
-    
-    nova_populacao = []
-    nova_populacao.append(melhor)
 
-    for i in range(len(populacao_atual) - 1):
-        filho = mutacao(populacao_atual[i], fitness_pop_penalizacao[i], fitness_pop_tempoAcumulado[i])
-        nova_populacao.append(filho)
-    
+    # Selecionar elites
+    elites = elitismo(populacao_atual, elite_size)
+
+    # Inicializar nova população com elites
+    nova_populacao = elites.copy()
+
+    # Gerar novos indivíduos até preencher a população
+    while len(nova_populacao) < len(populacao_atual):
+        # Seleção dos pais
+        pai1 = selecao_torneio(populacao_atual, k=k_torneio)
+        pai2 = selecao_torneio(populacao_atual, k=k_torneio)
+
+        # Crossover
+        if random.random() < crossover_rate:
+            filho1, filho2 = crossover_um_ponto(pai1, pai2)
+        else:
+            # Sem crossover, os filhos são cópias dos pais
+            filho1 = Individuo_evol(len(pai1.state))
+            filho1.state = pai1.state.copy()
+            filho1.open_time = pai1.open_time.copy()
+            filho2 = Individuo_evol(len(pai2.state))
+            filho2.state = pai2.state.copy()
+            filho2.open_time = pai2.open_time.copy()
+
+        # Mutação
+        filho1 = mutacao(filho1, mutation_rate=mutation_rate)
+        filho2 = mutacao(filho2, mutation_rate=mutation_rate)
+
+        # Adicionar filhos à nova população
+        nova_populacao.append(filho1)
+        if len(nova_populacao) < len(populacao_atual):
+            nova_populacao.append(filho2)
+
+    # Garantir que a nova população tenha o tamanho correto
+    nova_populacao = nova_populacao[:len(populacao_atual)]
+
+    # Avaliar fitness da nova população
+    for individuo in nova_populacao:
+        calcular_fitness(individuo)
+
+    # Atualizar o melhor indivíduo
+    nova_populacao.sort(key=lambda x: x.fitness_total)
+    melhor = nova_populacao[0]
+
     return melhor, nova_populacao
 
 def plotar_historico_fitness(historico):
@@ -112,6 +196,7 @@ for i in range(TAMANHO_POPULACAO):
     for index_Sem, semaforo in enumerate(individuo.semaforos):
         semaforo.estado = populacao_evol[i].state[index_Sem]
         semaforo.set_timer(populacao_evol[i].open_time[index_Sem])
+        semaforo.timer = semaforo.timer_clock
     populacao.append(individuo)
 
 # Inicialização das estatísticas e gráficos
@@ -176,7 +261,8 @@ while running and geracao_atual < NUM_GERACOES:
                 print(f"Indivíduo atual {individuo_atual.ruas[0].semaforos[0].carros_esperando}")
             count += 1
 
-        # Renderizando apenas o indivíduo atual
+        # pegar o melhor individuo para ser o atual
+        individuo_atual = populacao[0]
         individuo_atual.desenhar(tela)
 
         # Atualizar e desenhar estatísticas e gráficos
@@ -203,7 +289,7 @@ while running and geracao_atual < NUM_GERACOES:
 
     # Rodar o algoritmo evolutivo
     melhor, populacao_evol = algoritmo_evolutivo(populacao_evol)
-    historico_fitness.append(melhor.fitness)  # Adicionar o fitness do melhor indivíduo ao histórico
+    historico_fitness.append(melhor.fitness_total)  # Adicionar o fitness do melhor indivíduo ao histórico
 
     # Aplicar na população da simulação os valores da população evoluída
     for i in range(TAMANHO_POPULACAO):

@@ -37,7 +37,7 @@ class DisplayEstatisticas:
         tela.blit(geracao, (x_painel + self.padding, y_offset))
         y_offset += geracao.get_height() + self.padding
 
-        fitness_melhor = individuo_evol.fitness
+        fitness_melhor = individuo_evol.fitness_total
         fitness_melhor_texto = self.fonte_texto.render(f'Melhor Fitness atual: {fitness_melhor:.2f}', True, self.cor_texto)
         tela.blit(fitness_melhor_texto, (x_painel + self.padding, y_offset))
         y_offset += fitness_melhor_texto.get_height() + self.padding
@@ -68,7 +68,11 @@ class DisplayEstatisticas:
             tempo = self.fonte_texto.render(f'Tempo aberto: {individuo_evol.open_time[index]}', True, self.cor_texto)
             tela.blit(tempo, (x_painel + self.padding + 5, y_offset))
             y_offset += tempo.get_height() + 2
-            
+
+            estadoInicial = self.fonte_texto.render(f'Estado inicial: {individuo_evol.state[index]}', True, self.cor_texto)
+            tela.blit(estadoInicial, (x_painel + self.padding + 5, y_offset))
+            y_offset += estadoInicial.get_height() + 2
+
             # Linha divisória entre ruas
             pygame.draw.line(tela, (100, 100, 100), (x_painel + self.padding, y_offset), (x_painel + largura_painel - self.padding, y_offset))
             y_offset += self.padding
