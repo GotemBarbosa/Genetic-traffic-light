@@ -51,7 +51,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
     tela.fill(COR_VERDE)
 
     count = 0
@@ -60,7 +59,7 @@ while running:
         individuo.gerar_carros()
         #atualizar seus dados
         individuo.atualizar()
-        print(f"individuo {val} { individuo.ruas[0].semaforos[0].carros_esperando}")
+        # print(f"individuo {val} { individuo.ruas[0].semaforos[0].carros_esperando}")
         if(count == 0):
             print(f"individuo atual { individuo_atual.ruas[0].semaforos[0].carros_esperando}")
             

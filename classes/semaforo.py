@@ -9,9 +9,11 @@ class Semaforo:
         self.y = y
         self.rua = rua
         self.estado = estado
-        self.timer = TRAFIC_LIGHT_TIMER
+        self.timer_clock = TRAFIC_LIGHT_TIMER #TEMPO QUE O SEMAFORO FICA EM CADA ESTADO
+        self.timer = self.timer_clock #tempo atual dele ate mudar de estado
         self.carros_esperando = 0
         self.rate_carros = 0
+
 
     def desenhar_semaforo(self,tela):
         # Cores
@@ -76,4 +78,15 @@ class Semaforo:
         self.timer -= 1
         if self.timer == 0:
             self.estado = 1 - self.estado
-            self.timer = TRAFIC_LIGHT_TIMER
+            self.timer = self.timer_clock
+
+    def zerar_rate_carros(self):
+        self.rate_carros = 0
+        self.carros_esperando = 0
+        self.rua.carros_esperando = 0
+
+    def set_timer(self, timer):
+        self.timer_clock = timer
+        
+    def set_estado(self, estado):
+        self.estado = estado

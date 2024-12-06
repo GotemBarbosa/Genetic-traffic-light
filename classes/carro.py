@@ -63,6 +63,7 @@ class Carro:
                 if semaforo.estado == 0 and (semaforo.x - DISTANCE_TRAFIC_LIGHT <= self.x + 20 <= semaforo.x):
                     if self.tempoParado == 0:
                         semaforo.carros_esperando += 1
+                    semaforo.rate_carros += 1
                     self.tempoParado += 1
                     return False
             if self.orientacao == 'vertical':
@@ -70,6 +71,7 @@ class Carro:
                 if semaforo.estado == 0 and (semaforo.y - DISTANCE_TRAFIC_LIGHT <= self.y + 20 <= semaforo.y):
                     if self.tempoParado == 0:
                         semaforo.carros_esperando += 1
+                    semaforo.rate_carros += 1
                     self.tempoParado += 1
                     return False
         if self.tempoParado > 0:
