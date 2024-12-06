@@ -18,6 +18,8 @@ class Semaforo:
         cor_corpo = (50, 50, 50)         # Corpo do semáforo (cinza escuro)
         cor_borda = (0, 0, 0)            # Borda das luzes (preto)
         cor_luz_desligada = (30, 30, 30) # Luz desligada (cinza mais escuro)
+        cor_poste = (80, 80, 80)         # Cor do poste (cinza escuro)
+
 
         # Dimensões do semáforo
         largura_corpo = 20
@@ -25,12 +27,23 @@ class Semaforo:
         raio_luz = 8
         espaco_entre_luzes = 2
 
+        # Dimensões do poste
+        largura_poste = 5
+        altura_poste = 20
+
         # Posição do corpo do semáforo
         corpo_x = self.x - largura_corpo // 2
         corpo_y = self.y - altura_corpo // 2
 
+        # Posição do poste
+        poste_x = self.x - largura_poste // 2
+        poste_y = corpo_y + altura_corpo
+
         # Desenha o corpo do semáforo
         pygame.draw.rect(tela, cor_corpo, (corpo_x, corpo_y, largura_corpo, altura_corpo), border_radius=5)
+
+        # Desenha o poste do semáforo
+        pygame.draw.rect(tela, cor_poste, (poste_x, poste_y, largura_poste, altura_poste))
 
         # Posições das luzes
         luzes_y = [

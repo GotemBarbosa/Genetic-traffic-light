@@ -4,23 +4,54 @@ from classes.semaforo import Semaforo
 from config import *
 
 # Classe para exibir estatísticas
-class displayEstatisticas:
+class DisplayEstatisticas:
     def __init__(self, ruas, largura_tela=800):
         self.ruas = ruas
-        self.largura_tela = LARGURA_TELA
-        self.fonte = pygame.font.Font(None, 20)
-    
-    def desenhar_estatisticas(self,tela):
-        y = 10
-        for index, rua in enumerate(self.ruas):
-            titulo = self.fonte.render(f'RUA {index + 1} - {rua.orientacao}', True, (255, 255, 255))
-            texto = self.fonte.render(f'Carros: {rua.carros_transitando}', True, (255, 255, 255))
-            texto2 = self.fonte.render(f'Carros esperando: {rua.carros_esperando}', True, (255, 255, 255))
+        self.largura_tela = largura_tela
+        self.altura_tela = ALTURA_TELA
+        pygame.font.init()
+        self.fonte_titulo = pygame.font.SysFont('Arial', 18, bold=True)
+        self.fonte_texto = pygame.font.SysFont('Arial', 14)
+        self.cor_fundo = (40, 40, 40)
+        self.cor_texto = (255, 255, 255)
+        self.cor_titulo = (255, 215, 0)
+        self.cor_borda = (255, 255, 255)
+        self.padding = 8
 
-            tela.blit(titulo, (self.largura_tela - titulo.get_width() - 10, y))
-            tela.blit(texto, (self.largura_tela - texto.get_width() - 10, y + 15))
-            tela.blit(texto2, (self.largura_tela - texto2.get_width() - 10, y + 30))
-            y += 50
+    def desenhar_estatisticas(self, tela):
+        largura_painel = 180  # Reduzir a largura do painel
+        altura_painel = self.altura_tela
+        x_painel = self.largura_tela - largura_painel
+        y_painel = 0
+
+        # Desenha o painel de fundo
+        painel_rect = pygame.Rect(x_painel, y_painel, largura_painel, altura_painel)
+        pygame.draw.rect(tela, self.cor_fundo, painel_rect)
+        pygame.draw.rect(tela, self.cor_borda, painel_rect, 1)
+
+        y_offset = y_painel + self.padding
+
+        for index, rua in enumerate(self.ruas):
+            # Título da rua
+            titulo_rua = self.fonte_texto.render(f'Rua {index + 1} - {rua.orientacao}', True, self.cor_titulo)
+            tela.blit(titulo_rua, (x_painel + self.padding, y_offset))
+            y_offset += titulo_rua.get_height() + 2
+
+            # Carros transitando
+            carros_transitando = self.fonte_texto.render(f'Transitando: {rua.carros_transitando}', True, self.cor_texto)
+            tela.blit(carros_transitando, (x_painel + self.padding + 5, y_offset))
+            y_offset += carros_transitando.get_height() + 2
+
+            # Carros esperando
+            carros_esperando = self.fonte_texto.render(f'Esperando: {rua.carros_esperando}', True, self.cor_texto)
+            tela.blit(carros_esperando, (x_painel + self.padding + 5, y_offset))
+            y_offset += carros_esperando.get_height() + self.padding
+
+            # Linha divisória entre ruas
+            pygame.draw.line(tela, (100, 100, 100), (x_painel + self.padding, y_offset), (x_painel + largura_painel - self.padding, y_offset))
+            y_offset += self.padding
+
+        # Espaço para adicionar mais estatísticas futuramente
 
 # Classe para exibir gráfico
 class Grafico:
