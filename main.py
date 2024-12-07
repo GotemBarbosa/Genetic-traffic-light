@@ -28,10 +28,9 @@ def gerar_populacao_inicial(tamanho_populacao, num_semaforos):
 def calcular_fitness(individuo_gen):
     fitness_tempo_acumulado = 0; # em relaçao ao tempo acumulado de espera
     fitness_penalizaçao = 0; # penalizaçao em que 2 semaforos estao abertos ao mesmo tempo
-
-    for i in range(len(individuo_gen.tempoAcumulado)):
+    for i in range(len(individuo_gen.open_time)):
         fitness_tempo_acumulado += individuo_gen.tempoAcumulado[i]
-        fitness_penalizaçao += individuo_gen.penalizacao[i] * 2 # Peso maior para penalizações
+        fitness_penalizaçao += individuo_gen.penalizacao[i] * 4 # Peso maior para penalizações
 
 
     fitness_total = fitness_tempo_acumulado + fitness_penalizaçao
@@ -39,7 +38,6 @@ def calcular_fitness(individuo_gen):
     individuo_gen.fitness_total = fitness_total
     individuo_gen.fitness_penalizacao = fitness_penalizaçao
     individuo_gen.fitness_tempo_acumulado = fitness_tempo_acumulado
-    
     return fitness_total
 
 # Função de seleção por torneio 
@@ -118,6 +116,7 @@ def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1,
     # Ordenar a população com base no fitness
     populacao_atual.sort(key=lambda x: x.fitness_total)
     melhor = populacao_atual[0]
+    print(melhor.fitness_total)
 
     # Selecionar elites
     elites = elitismo(populacao_atual, elite_size)
@@ -151,17 +150,18 @@ def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1,
         nova_populacao.append(filho1)
         if len(nova_populacao) < len(populacao_atual):
             nova_populacao.append(filho2)
+    
 
     # Garantir que a nova população tenha o tamanho correto
     nova_populacao = nova_populacao[:len(populacao_atual)]
 
+    
     # Avaliar fitness da nova população
     for individuo in nova_populacao:
         calcular_fitness(individuo)
 
     # Atualizar o melhor indivíduo
     nova_populacao.sort(key=lambda x: x.fitness_total)
-    melhor = nova_populacao[0]
 
     return melhor, nova_populacao
 
@@ -188,16 +188,18 @@ clock = pygame.time.Clock()
 fps = FPS
 populacao = []
 
-populacao_evol = gerar_populacao_inicial(TAMANHO_POPULACAO, NUM_SEMAFOROS)
+for i in range(TAMANHO_POPULACAO):
+    individuo = Individuo(id=i) # gerando um individuo
+    populacao.append(individuo)
+
+populacao_evol = gerar_populacao_inicial(TAMANHO_POPULACAO, len(populacao[0].semaforos))
 
 # Gerando população
 for i in range(TAMANHO_POPULACAO):
-    individuo = Individuo(id=i)  # Gerando um individuo
-    for index_Sem, semaforo in enumerate(individuo.semaforos):
+    for index_Sem, semaforo in enumerate(populacao[i].semaforos):
         semaforo.estado = populacao_evol[i].state[index_Sem]
         semaforo.set_timer(populacao_evol[i].open_time[index_Sem])
         semaforo.timer = semaforo.timer_clock
-    populacao.append(individuo)
 
 # Inicialização das estatísticas e gráficos
 individuo_atual = populacao[0]  # Pode começar com o melhor ou outro indivíduo
@@ -214,12 +216,14 @@ geracao_atual = 0  # Contador de gerações
 
 # Histórico de fitness para plotagem
 historico_fitness = []
+melhor = None
 
 while running and geracao_atual < NUM_GERACOES:
     generation_running = True
     tela.fill(COR_VERDE)
-    
-    melhor = populacao_evol[0]
+
+    if(melhor == None):
+        melhor = populacao_evol[0]
     tela.fill(COR_VERDE)
     
     simulation_iteration = 0  # Iterações da simulação
@@ -235,11 +239,15 @@ while running and geracao_atual < NUM_GERACOES:
                         fps = FPS * FPS_MULTIPLIER
                     else:
                         fps = FPS
+                if event.key == pygame.K_s:
+                    if fps == FPS:
+                        fps = FPS / 3
+                    else:
+                        fps = FPS
 
         # Limpar a tela a cada iteração
         tela.fill(COR_VERDE)
 
-        count = 0
         for val, individuo in enumerate(populacao):
             individuo_evol = populacao_evol[val]
             # Gerar carros no indivíduo atual
@@ -257,15 +265,13 @@ while running and geracao_atual < NUM_GERACOES:
                         individuo_evol.penalizacao[i] = valor
                         individuo_evol.penalizacao[i + 1] = valor
 
-            if count == 0:
-                print(f"Indivíduo atual {individuo_atual.ruas[0].semaforos[0].carros_esperando}")
-            count += 1
 
         # pegar o melhor individuo para ser o atual
         individuo_atual = populacao[0]
         individuo_atual.desenhar(tela)
 
         # Atualizar e desenhar estatísticas e gráficos
+
         displayEstatisticas.desenhar_estatisticas(tela, geracao_atual, melhor)
         # grafico.adicionar_dados(melhor.fitness)  # Passar o fitness do melhor indivíduo
         # grafico.desenhar_grafico(tela)
@@ -300,7 +306,7 @@ while running and geracao_atual < NUM_GERACOES:
             semaforo.set_timer(individuo_evol.open_time[index_Sem])
 
     # Atualizar o indivíduo atual (pode optar por sempre selecionar o melhor)
-    individuo_atual = populacao[0]  # Supondo que a população está ordenada pelo fitness
+    individuo_atual = melhor  # Supondo que a população está ordenada pelo fitness
 
     geracao_atual += 1  # Incrementar o contador de gerações
 

@@ -12,6 +12,7 @@ class DisplayEstatisticas:
         pygame.font.init()
         self.fonte_titulo = pygame.font.SysFont('Arial', 18, bold=True)
         self.fonte_texto = pygame.font.SysFont('Arial', 14)
+        self.fonte_texto_pequeno = pygame.font.SysFont('Arial', 10)
         self.cor_fundo = (40, 40, 40)
         self.cor_texto = (255, 255, 255)
         self.cor_titulo = (255, 215, 0)
@@ -26,6 +27,8 @@ class DisplayEstatisticas:
         x_painel = self.largura_tela - largura_painel
         y_painel = 0
 
+        
+
         # Desenha o painel de fundo
         painel_rect = pygame.Rect(x_painel, y_painel, largura_painel, altura_painel)
         pygame.draw.rect(tela, self.cor_fundo, painel_rect)
@@ -38,14 +41,14 @@ class DisplayEstatisticas:
         y_offset += geracao.get_height() + self.padding
 
         fitness_melhor = individuo_evol.fitness_total
-        fitness_melhor_texto = self.fonte_texto.render(f'Melhor Fitness atual: {fitness_melhor:.2f}', True, self.cor_texto)
+        fitness_melhor_texto = self.fonte_texto_pequeno.render(f'Melhor Fitness atual: {fitness_melhor:.2f}', True, self.cor_texto)
         tela.blit(fitness_melhor_texto, (x_painel + self.padding, y_offset))
         y_offset += fitness_melhor_texto.get_height() + self.padding
 
         if(fitness_melhor < self.melhor_fitness_geral):
             self.melhor_fitness_geral = fitness_melhor
         
-        fitness_melhor_geral_texto = self.fonte_texto.render(f'Melhor fitness encontrado: {self.melhor_fitness_geral:.2f}', True, self.cor_texto)
+        fitness_melhor_geral_texto = self.fonte_texto_pequeno.render(f'Melhor fitness encontrado: {self.melhor_fitness_geral:.2f}', True, self.cor_texto)
         tela.blit(fitness_melhor_geral_texto, (x_painel + self.padding, y_offset))
         y_offset += fitness_melhor_geral_texto.get_height() + self.padding
 

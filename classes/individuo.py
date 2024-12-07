@@ -95,9 +95,9 @@ class Individuo_evol:
         self.state = []
         self.tempoAcumulado = [0]*num_semaforos
         self.penalizacao = [0]*num_semaforos
-        self.fitness_total = 0
-        self.fitness_penalizacao = 0
-        self.fitness_tempo_acumulado = 0
+        self.fitness_total = int(1e9)
+        self.fitness_penalizacao = int(1e9)
+        self.fitness_tempo_acumulado = int(1e9)
         for i in range(num_semaforos):
             self.state.append(random.randint(0, 1))
         
