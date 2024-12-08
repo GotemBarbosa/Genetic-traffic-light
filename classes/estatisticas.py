@@ -2,6 +2,11 @@ import pygame
 import random
 from classes.semaforo import Semaforo
 from config import *
+import pygame
+import matplotlib.pyplot as plt
+import numpy as np
+import io
+from PIL import Image
 
 # Classe para exibir estatísticas
 class DisplayEstatisticas:
@@ -63,10 +68,15 @@ class DisplayEstatisticas:
             tela.blit(carros_transitando, (x_painel + self.padding + 5, y_offset))
             y_offset += carros_transitando.get_height() + 2
 
+
             for key, semaforo in enumerate(individuo_atual.ruas[index].semaforos):
                 estado_semaforo = self.fonte_texto.render(f'Semaforo {key} | estado: {semaforo.estado_inicial}', True, self.cor_texto)
                 tela.blit(estado_semaforo, (x_painel + self.padding + 5, y_offset))
                 y_offset += estado_semaforo.get_height() + 2
+
+                carros_esperando = self.fonte_texto.render(f'Carros esperando: {semaforo.carros_esperando}', True, self.cor_texto)
+                tela.blit(carros_esperando, (x_painel + self.padding + 5, y_offset))
+                y_offset += carros_esperando.get_height() + 2
 
                 tempo_aberto = self.fonte_texto.render(f'Tempo aberto: {semaforo.timer_clock}', True, self.cor_texto)
                 tela.blit(tempo_aberto, (x_painel + self.padding + 5, y_offset))
@@ -105,3 +115,173 @@ class Grafico:
             for i in range(1, len(self.dados[rua])):
                 pygame.draw.line(tela, cor, (self.largura_tela - self.max_dados + i - 1, self.altura_tela - self.dados[rua][i - 1] * 5),
                                  (self.largura_tela - self.max_dados + i, self.altura_tela - self.dados[rua][i] * 5))
+                
+class GraficoFitness:
+    def __init__(self, largura_tela=800, altura_tela=600, largura_grafico=150, altura_grafico=100, posicao=(500, 400)):
+        """
+        Inicializa o gráfico de fitness.
+
+        :param largura_tela: Largura total da tela.
+        :param altura_tela: Altura total da tela.
+        :param largura_grafico: Largura do gráfico.
+        :param altura_grafico: Altura do gráfico.
+        :param posicao: Tupla (x, y) representando a posição superior esquerda do gráfico.
+        """
+        self.largura_tela = largura_tela
+        self.altura_tela = altura_tela
+        self.largura_grafico = largura_grafico
+        self.altura_grafico = altura_grafico
+        self.posicao = posicao  # Posição (x, y) do canto superior esquerdo do gráfico
+        self.dados = []
+        self.max_dados = 100
+        self.cor = (255, 0, 0)  # Vermelho para fitness
+        self.padding = 50  # Espaço para margens e rótulos dentro do gráfico
+        self.fonte = pygame.font.SysFont(None, 20)  # Fonte para rótulos
+
+    def adicionar_dado(self, fitness):
+        self.dados.append(fitness)
+        if len(self.dados) > self.max_dados:
+            self.dados.pop(0)
+
+# class GraficoFitness:
+#     def __init__(self, largura_tela=800, altura_tela=600, largura_grafico=150, altura_grafico=100, posicao=(500, 400)):
+#         """
+#         Inicializa o gráfico de fitness.
+
+#         :param largura_tela: Largura total da tela.
+#         :param altura_tela: Altura total da tela.
+#         :param largura_grafico: Largura do gráfico.
+#         :param altura_grafico: Altura do gráfico.
+#         :param posicao: Tupla (x, y) representando a posição superior esquerda do gráfico.
+#         """
+#         self.largura_tela = largura_tela
+#         self.altura_tela = altura_tela
+#         self.largura_grafico = largura_grafico
+#         self.altura_grafico = altura_grafico
+#         self.posicao = posicao  # Posição (x, y) do canto superior esquerdo do gráfico
+#         self.dados = []
+#         self.max_dados = 100
+#         self.cor = (255, 0, 0)  # Vermelho para fitness
+#         self.padding = 50  # Espaço para margens e rótulos dentro do gráfico
+#         self.fonte = pygame.font.SysFont(None, 20)  # Fonte para rótulos
+
+#     def adicionar_dado(self, fitness):
+#         self.dados.append(fitness)
+#         if len(self.dados) > self.max_dados:
+#             self.dados.pop(0)
+
+#     def desenhar_grafico(self, tela):
+#             if len(self.dados) < 2:
+#                 return
+
+#             # Definir área do gráfico
+#             x_inicio, y_inicio = self.posicao
+#             largura_area = self.largura_grafico
+#             altura_area = self.altura_grafico
+
+#             # Determina escala fixa de 0 a 1000
+#             max_fitness = 1000
+#             min_fitness = 0
+#             range_fitness = max_fitness - min_fitness
+
+#             # Desenhar fundo do gráfico
+#             pygame.draw.rect(tela, (230, 230, 230), (x_inicio, y_inicio, largura_area, altura_area))
+
+#             # Desenhar linhas de grade horizontais
+#             num_linhas_grade = 5
+#             for i in range(num_linhas_grade + 1):
+#                 y = y_inicio + i * altura_area / num_linhas_grade
+#                 pygame.draw.line(tela, (200, 200, 200), (x_inicio, y), (x_inicio + largura_area, y), 1)
+#                 # Rótulos das linhas de grade
+#                 fitness_label = self.fonte.render(f"{max_fitness - i * range_fitness / num_linhas_grade:.2f}", True, (0, 0, 0))
+#                 tela.blit(fitness_label, (x_inicio - self.padding + 10, y - fitness_label.get_height() / 2))
+
+#             # Desenhar linhas de grade verticais (menos frequentes para reduzir a "velocidade")
+#             num_linhas_grade_vert = 10  # Aumentar o número de linhas verticais para mover mais devagar
+#             for i in range(num_linhas_grade_vert + 1):
+#                 x = x_inicio + i * largura_area / num_linhas_grade_vert
+#                 pygame.draw.line(tela, (200, 200, 200), (x, y_inicio), (x, y_inicio + altura_area), 1)
+
+#             # Desenhar eixos
+#             pygame.draw.line(tela, (0, 0, 0), (x_inicio, y_inicio), (x_inicio, y_inicio + altura_area), 2)  # Eixo Y
+#             pygame.draw.line(tela, (0, 0, 0), (x_inicio, y_inicio + altura_area), (x_inicio + largura_area, y_inicio + altura_area), 2)  # Eixo X
+
+#             # Calcular espaçamento entre os pontos
+#             espaçamento_x = largura_area / self.max_dados
+
+#             # Desenhar linha do gráfico de fitness
+#             for i in range(1, len(self.dados)):
+#                 x1 = x_inicio + (i - 1) * espaçamento_x
+#                 y1 = y_inicio + altura_area - ((self.dados[i - 1] - min_fitness) / range_fitness) * altura_area
+#                 x2 = x_inicio + i * espaçamento_x
+#                 y2 = y_inicio + altura_area - ((self.dados[i] - min_fitness) / range_fitness) * altura_area
+#                 pygame.draw.line(tela, self.cor, (x1, y1), (x2, y2), 2)
+
+#             # Opcional: Desenhar pontos nos dados
+#             for i in range(len(self.dados)):
+#                 x = x_inicio + i * espaçamento_x
+#                 y = y_inicio + altura_area - ((self.dados[i] - min_fitness) / range_fitness) * altura_area
+#                 pygame.draw.circle(tela, self.cor, (int(x), int(y)), 3)
+
+#             # Mostrar valor atual se mudou em relação à última iteração
+#             if self.dados[-1] != self.dados[-2]:
+#                 valor_atual_label = self.fonte.render(f"{self.dados[-1]:.2f}", True, (0, 0, 0))
+#                 tela.blit(valor_atual_label, (x_inicio + largura_area + 10, y_inicio + altura_area - ((self.dados[-1] - min_fitness) / range_fitness) * altura_area - valor_atual_label.get_height() / 2))
+
+class GraficoFitness:
+    def __init__(self, largura_tela=800, altura_tela=600, largura_grafico=150, altura_grafico=100, posicao=(500, 400)):
+        """
+        Inicializa o gráfico de fitness.
+
+        :param largura_tela: Largura total da tela.
+        :param altura_tela: Altura total da tela.
+        :param largura_grafico: Largura do gráfico.
+        :param altura_grafico: Altura do gráfico.
+        :param posicao: Tupla (x, y) representando a posição superior esquerda do gráfico.
+        """
+        self.largura_tela = largura_tela
+        self.altura_tela = altura_tela
+        self.largura_grafico = largura_grafico
+        self.altura_grafico = altura_grafico
+        self.posicao = posicao  # Posição (x, y) do canto superior esquerdo do gráfico
+        self.dados = []
+        self.max_dados = 100
+        self.grafico = None  # Armazena a imagem do gráfico
+        self.dados_mudaram = False  # Flag para indicar se os dados mudaram
+
+    def adicionar_dado(self, fitness):
+        self.dados.append(fitness)
+        if len(self.dados) > self.max_dados:
+            self.dados.pop(0)
+        self.dados_mudaram = True  # Indica que os dados mudaram
+
+    def criar_grafico(self):
+        # Cria o gráfico com Matplotlib
+        fig, ax = plt.subplots(figsize=(self.largura_grafico / 100, self.altura_grafico / 100), dpi=100)
+        ax.plot(self.dados, color='red')
+        ax.set_ylim(0, 1000)
+
+        # Converte o gráfico em uma imagem
+        buf = io.BytesIO()
+        plt.savefig(buf, format='PNG')
+        buf.seek(0)
+        image = Image.open(buf)
+        image = image.convert('RGBA')
+        size = image.size
+        image = pygame.image.fromstring(image.tobytes(), size, 'RGBA')
+        buf.close()
+        plt.close(fig)
+        return image
+
+    def desenhar_grafico(self, tela):
+        if len(self.dados) < 2:
+            return
+
+        # Cria o gráfico apenas se os dados mudaram
+        if self.dados_mudaram:
+            self.grafico = self.criar_grafico()
+            self.dados_mudaram = False
+
+        # Desenha o gráfico na tela do Pygame
+        if self.grafico:
+            tela.blit(self.grafico, self.posicao)

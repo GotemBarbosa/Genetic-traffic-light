@@ -32,7 +32,7 @@ class Individuo:
             rua3 = Rua(3 * LARGURA_TELA // 4 - 250, 0, 50, ALTURA_TELA, 'vertical')
             rua4 = Rua(0, 3 * ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
 
-            self.ruas = [rua1, rua2, rua3, rua4]
+            self.ruas = [rua1, rua2]
 
             # Verificar interconexões entre as ruas
             self.verificar_interconexoes()

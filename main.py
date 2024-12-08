@@ -1,7 +1,7 @@
 import pygame
 from classes.individuo import Individuo, Individuo_evol
 from config import *
-from classes.estatisticas import DisplayEstatisticas, Grafico
+from classes.estatisticas import DisplayEstatisticas, Grafico, GraficoFitness
 from classes.AlgotimoGenetico import algoritmo_evolutivo, penalizacao
 
 '''
@@ -46,6 +46,7 @@ for i in range(TAMANHO_POPULACAO):
 individuo_atual = populacao[0]  # Pode começar com o melhor ou outro indivíduo
 displayEstatisticas = DisplayEstatisticas(individuo_atual.ruas, LARGURA_TELA)
 grafico = Grafico(individuo_atual.ruas, LARGURA_TELA, ALTURA_TELA)
+graficoFitness = GraficoFitness(LARGURA_TELA, ALTURA_TELA)
 
 # Configuração da janela
 tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))  # Tamanho da janela
@@ -58,6 +59,7 @@ geracao_atual = 0  # Contador de gerações
 # Histórico de fitness para plotagem
 historico_fitness = []
 melhor = None
+fit_melhor_anterior = 0
 
 
 while running and geracao_atual < NUM_GERACOES:
@@ -131,8 +133,10 @@ while running and geracao_atual < NUM_GERACOES:
         # Atualizar e desenhar estatísticas e gráficos
 
         displayEstatisticas.desenhar_estatisticas(tela, geracao_atual, melhor, individuo_atual)
-        # grafico.adicionar_dados(melhor.fitness)  # Passar o fitness do melhor indivíduo
-        # grafico.desenhar_grafico(tela)
+
+        # if(melhor.fitness_total != fit_melhor_anterior):
+        #     graficoFitness.adicionar_dado(melhor.fitness_total)
+        # graficoFitness.desenhar_grafico(tela)
 
         pygame.display.update()
         clock.tick(fps)
@@ -154,6 +158,7 @@ while running and geracao_atual < NUM_GERACOES:
 
 
     # Rodar o algoritmo evolutivo
+    fit_melhor_anterior = melhor.fitness_total
     melhor, populacao_evol = algoritmo_evolutivo(populacao_evol, geracao_atual=geracao_atual)
     historico_fitness.append(melhor.fitness_total)  # Adicionar o fitness do melhor indivíduo ao histórico
 

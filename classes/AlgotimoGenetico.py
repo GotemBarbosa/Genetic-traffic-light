@@ -67,7 +67,7 @@ def calcular_fitness(individuo_gen):
     fitness_penalizaçao = 0; # penalizaçao em que 2 semaforos estao abertos ao mesmo tempo
     for i in range(len(individuo_gen.open_time)):
         fitness_tempo_acumulado += individuo_gen.tempoAcumulado[i]
-        fitness_penalizaçao += individuo_gen.penalizacao[i] * 4 # Peso maior para penalizações
+        fitness_penalizaçao += individuo_gen.penalizacao[i] * PENALIZACAO_PESO # Peso maior para penalizações
 
 
     fitness_total = fitness_tempo_acumulado + fitness_penalizaçao
