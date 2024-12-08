@@ -6,14 +6,8 @@ from classes.AlgotimoGenetico import algoritmo_evolutivo, penalizacao
 
 '''
 TODO:
-- Mudar para ter a acumulada do tempo de espera nas ruas (FEITO)
-- Fazer com que cada iteraçao da futura geraçao de treinamento seja um loop de pygame
-- Fazer as caracteristicas do individuo em si que serao usadas no evolutivo (informacoes do gene)
-- Fazer com que essas caracteristicas alterem essa futura funcao de treinamento
-- Fazer com que essa funcao de treinamento tenha um tempo definido ( OU INTERAÇOES DO WHILE RUNNING, QUE EU ACHO MELHOR )
-- Desenvolver a funçao de crossover
-- Desenvolver a funçao de mutaçao
-- Desenvolver a funcao de fitness
+- Melhorar a geraçao dos carros
+- Fazer resultados melhores para mais de 2 ruas
 - Fazer novas estatisticas inScreen considerando o algoritmo genetico
 '''
 
@@ -32,6 +26,7 @@ pygame.font.init()
 
 clock = pygame.time.Clock()
 fps = FPS
+speed_multiplier = 1  # Multiplicador de velocidade
 populacao = []
 
 for i in range(TAMANHO_POPULACAO):
@@ -90,27 +85,39 @@ while running and geracao_atual < NUM_GERACOES:
                         fps = FPS / 3
                     else:
                         fps = FPS
+                if event.key == pygame.K_SPACE:
+                    if speed_multiplier == 1:
+                        speed_multiplier = 10
+                    else:
+                        speed_multiplier = 1
+
 
         # Limpar a tela a cada iteração
         tela.fill(COR_VERDE)
 
-        for val, individuo in enumerate(populacao):
-            individuo_evol = populacao_evol[val]
-            # Gerar carros no indivíduo atual
-            individuo.gerar_carros()
-            # Atualizar seus dados
-            individuo.atualizar()
-            
-            # Atualizar as métricas dos indivíduos (tempo acumulado e penalização por semáforo do indivíduo):
-            for i in range(len(individuo.semaforos)):
-                individuo_evol.tempoAcumulado[i] = individuo.semaforos[i].rate_carros
+        # Executar múltiplas iterações de simulação baseado no multiplicador de velocidade
+        for _ in range(speed_multiplier):
+            for val, individuo in enumerate(populacao):
+                individuo_evol = populacao_evol[val]
+                # Gerar carros no indivíduo atual
+                individuo.gerar_carros()
+                # Atualizar seus dados
+                individuo.atualizar()
+                
+                # Atualizar as métricas dos indivíduos (tempo acumulado e penalização por semáforo do indivíduo):
+                for i in range(len(individuo.semaforos)):
+                    individuo_evol.tempoAcumulado[i] = individuo.semaforos[i].rate_carros
 
-                if i % 2 == 0:  # Só analisar em pares
-                    valor = penalizacao(individuo, i)
-                    if valor > 0:
-                        individuo_evol.penalizacao[i] = valor
-                        individuo_evol.penalizacao[i + 1] = valor
+                    if i % 2 == 0:  # Só analisar em pares
+                        valor = penalizacao(individuo, i)
+                        if valor > 0:
+                            individuo_evol.penalizacao[i] = valor
+                            individuo_evol.penalizacao[i + 1] = valor
 
+            simulation_iteration +=1
+            if simulation_iteration >= NUM_ITERACOES:
+                generation_running = False  # Finalizar a geração atual
+                break
 
         # pegar o melhor individuo para ser o atual
         individuo_atual = populacao[0]
@@ -140,7 +147,7 @@ while running and geracao_atual < NUM_GERACOES:
 
 
     # Rodar o algoritmo evolutivo
-    melhor, populacao_evol = algoritmo_evolutivo(populacao_evol)
+    melhor, populacao_evol = algoritmo_evolutivo(populacao_evol, geracao_atual=geracao_atual)
     historico_fitness.append(melhor.fitness_total)  # Adicionar o fitness do melhor indivíduo ao histórico
 
     # Aplicar na população da simulação os valores da população evoluída

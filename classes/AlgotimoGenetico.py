@@ -1,13 +1,16 @@
 import random
 from classes.individuo import Individuo_evol
 
+# NAO É UMA CLASSE AINDA
+
+
 # Função de seleção por torneio 
 def selecao_torneio(populacao, k=3):
     torneio = random.sample(populacao, k)
     torneio.sort(key=lambda x: x.fitness_total)
     return torneio[0]
 
-
+# CROSSOVER
 def crossover_um_ponto(pai1, pai2):
     ponto = random.randint(1, len(pai1.state) - 1)  # Escolhe um ponto de crossover
 
@@ -27,6 +30,8 @@ def crossover_um_ponto(pai1, pai2):
     filho2.open_time[ponto:] = pai1.open_time[ponto:]
 
     return filho1, filho2
+
+# MUTAÇÃO
 
 def mutacao(individuo, mutation_rate=0.1, base_mutation_step=5, 
            min_open_time=1, max_open_time=120,  # Ajuste conforme necessário
@@ -56,7 +61,7 @@ def elitismo(populacao, elite_size=1):
     return elites
 
 
-
+# Funcao para calcular o fitness de um individuo
 def calcular_fitness(individuo_gen):
     fitness_tempo_acumulado = 0; # em relaçao ao tempo acumulado de espera
     fitness_penalizaçao = 0; # penalizaçao em que 2 semaforos estao abertos ao mesmo tempo
@@ -83,7 +88,7 @@ def penalizacao(individuo, index):
 
 
 def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1, 
-                        k_torneio=3, crossover_rate=0.8):
+                        k_torneio=3, crossover_rate=0.8, geracao_atual=0):
     """
     Executa uma geração do algoritmo evolutivo.
 
@@ -106,7 +111,7 @@ def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1,
     # Ordenar a população com base no fitness
     populacao_atual.sort(key=lambda x: x.fitness_total)
     melhor = populacao_atual[0]
-    print(melhor.fitness_total)
+    print(f"geraçao {geracao_atual} melhorFit: {melhor.fitness_total}")
 
     # Selecionar elites
     elites = elitismo(populacao_atual, elite_size)
