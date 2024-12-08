@@ -59,6 +59,7 @@ geracao_atual = 0  # Contador de gerações
 historico_fitness = []
 melhor = None
 
+
 while running and geracao_atual < NUM_GERACOES:
     generation_running = True
     tela.fill(COR_VERDE)
@@ -90,7 +91,11 @@ while running and geracao_atual < NUM_GERACOES:
                         speed_multiplier = 10
                     else:
                         speed_multiplier = 1
-
+                if event.key == pygame.K_p:
+                    if(fps == FPS):
+                        fps = 1
+                    else:
+                        fps = FPS
 
         # Limpar a tela a cada iteração
         tela.fill(COR_VERDE)
@@ -144,6 +149,8 @@ while running and geracao_atual < NUM_GERACOES:
             rua.carros_esperando = 0
         #deletando os carros das ruas
         individuo.carros = []
+        for rua in individuo.ruas:
+            rua.carros = []
 
 
     # Rodar o algoritmo evolutivo

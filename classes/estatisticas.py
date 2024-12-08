@@ -63,18 +63,24 @@ class DisplayEstatisticas:
             tela.blit(carros_transitando, (x_painel + self.padding + 5, y_offset))
             y_offset += carros_transitando.get_height() + 2
 
-            # Carros esperando
-            carros_esperando = self.fonte_texto.render(f'Esperando: {rua.carros_esperando}', True, self.cor_texto)
-            tela.blit(carros_esperando, (x_painel + self.padding + 5, y_offset))
-            y_offset += carros_esperando.get_height() + self.padding
 
-            tempo = self.fonte_texto.render(f'Tempo aberto: {individuo_evol.open_time[index]}', True, self.cor_texto)
-            tela.blit(tempo, (x_painel + self.padding + 5, y_offset))
-            y_offset += tempo.get_height() + 2
 
-            estadoInicial = self.fonte_texto.render(f'Estado inicial: {individuo_evol.state[index]}', True, self.cor_texto)
-            tela.blit(estadoInicial, (x_painel + self.padding + 5, y_offset))
-            y_offset += estadoInicial.get_height() + 2
+            for key, semaforo in enumerate(rua.semaforos):
+                # Estado do semáforo
+                estado_semaforo = self.fonte_texto.render(f'Semaforo {key} | estado: {individuo_evol.state[key + index]}', True, self.cor_texto)
+                tela.blit(estado_semaforo, (x_painel + self.padding + 5, y_offset))
+                y_offset += estado_semaforo.get_height() + 2
+
+                # Carros esperando no semáforo
+                carros_esperando_semaforo = self.fonte_texto.render(f'Esperando: {semaforo.carros_esperando}', True, self.cor_texto)
+                tela.blit(carros_esperando_semaforo, (x_painel + self.padding + 5, y_offset))
+                y_offset += carros_esperando_semaforo.get_height() + 2    
+        
+
+                # Tempo aberto
+                tempo = self.fonte_texto.render(f'Tempo aberto: {individuo_evol.open_time[key + index]}', True, self.cor_texto)
+                tela.blit(tempo, (x_painel + self.padding + 5, y_offset))
+                y_offset += tempo.get_height() + 5
 
             # Linha divisória entre ruas
             pygame.draw.line(tela, (100, 100, 100), (x_painel + self.padding, y_offset), (x_painel + largura_painel - self.padding, y_offset))

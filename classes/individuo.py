@@ -32,7 +32,7 @@ class Individuo:
             rua3 = Rua(3 * LARGURA_TELA // 4 - 250, 0, 50, ALTURA_TELA, 'vertical')
             rua4 = Rua(0, 3 * ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
 
-            self.ruas = [rua1, rua2]
+            self.ruas = [rua1, rua2, rua3]
 
             # Verificar interconexões entre as ruas
             self.verificar_interconexoes()
@@ -73,10 +73,10 @@ class Individuo:
 
     def gerar_carros(self):
         # Gerar carros aleatoriamente nas ruas do indivíduo
-        if random.random() < CAR_GENERATION_PROBABILITY:
-            rua_origem = random.choice(self.ruas)
-            carro = Carro(rua_origem)
-            self.carros.append(carro)
+        for rua in self.ruas:
+            if random.random() < CAR_GENERATION_PROBABILITY:
+                carro = Carro(rua)
+                self.carros.append(carro)
 
     def atualizar(self):
          # Atualiza os semáforos nas interconexões
