@@ -1,5 +1,6 @@
 import random
 from classes.individuo import Individuo_evol
+from config import *
 
 # NAO É UMA CLASSE AINDA
 
@@ -32,7 +33,6 @@ def crossover_um_ponto(pai1, pai2):
     return filho1, filho2
 
 # MUTAÇÃO
-
 def mutacao(individuo, mutation_rate=0.1, base_mutation_step=5, 
            min_open_time=1, max_open_time=120,  # Ajuste conforme necessário
            min_state=0, max_state=10):
@@ -55,7 +55,7 @@ def mutacao(individuo, mutation_rate=0.1, base_mutation_step=5,
 
 
 
-def elitismo(populacao, elite_size=1):
+def elitismo(populacao, elite_size=TAMANHO_POPULACAO//10):
     populacao_sorted = sorted(populacao, key=lambda x: x.fitness_total)
     elites = populacao_sorted[:elite_size]
     return elites
@@ -67,7 +67,7 @@ def calcular_fitness(individuo_gen):
     fitness_penalizaçao = 0; # penalizaçao em que 2 semaforos estao abertos ao mesmo tempo
     for i in range(len(individuo_gen.open_time)):
         fitness_tempo_acumulado += individuo_gen.tempoAcumulado[i]
-        fitness_penalizaçao += individuo_gen.penalizacao[i] * 10 # Peso maior para penalizações
+        fitness_penalizaçao += individuo_gen.penalizacao[i] * 4 # Peso maior para penalizações
 
 
     fitness_total = fitness_tempo_acumulado + fitness_penalizaçao

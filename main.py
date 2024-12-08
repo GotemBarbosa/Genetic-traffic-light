@@ -130,7 +130,7 @@ while running and geracao_atual < NUM_GERACOES:
 
         # Atualizar e desenhar estatísticas e gráficos
 
-        displayEstatisticas.desenhar_estatisticas(tela, geracao_atual, melhor)
+        displayEstatisticas.desenhar_estatisticas(tela, geracao_atual, melhor, individuo_atual)
         # grafico.adicionar_dados(melhor.fitness)  # Passar o fitness do melhor indivíduo
         # grafico.desenhar_grafico(tela)
 

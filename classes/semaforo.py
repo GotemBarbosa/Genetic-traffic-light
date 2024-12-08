@@ -9,6 +9,7 @@ class Semaforo:
         self.y = y
         self.rua = rua
         self.estado = estado
+        self.estado_inicial = estado
         self.timer_clock = initial_timer #TEMPO QUE O SEMAFORO FICA EM CADA ESTADO
         self.timer = self.timer_clock #tempo atual dele ate mudar de estado
         self.carros_esperando = 0
