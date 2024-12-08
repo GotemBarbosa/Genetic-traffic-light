@@ -13,6 +13,7 @@ class Individuo:
             self.carros = []  # Lista de carros
             self.semaforos = []  # Lista de semáforos
             self.fitness = None  # Valor de fitness do indivíduo
+            
 
             # Inicializar o grid do indivíduo
             self.inicializar_grid()
@@ -28,10 +29,10 @@ class Individuo:
 
             rua1 = Rua(0, ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
             rua2 = Rua(LARGURA_TELA // 4 - 100, 0, 50, ALTURA_TELA, 'vertical')
-            # rua3 = Rua(3 * LARGURA_TELA // 4 - 250, 0, 50, ALTURA_TELA, 'vertical')
+            rua3 = Rua(3 * LARGURA_TELA // 4 - 250, 0, 50, ALTURA_TELA, 'vertical')
             # rua4 = Rua(0, 3 * ALTURA_TELA // 4, LARGURA_TELA, 50, 'horizontal')
 
-            self.ruas = [rua1, rua2]
+            self.ruas = [rua1, rua2, rua3]
 
             # Verificar interconexões entre as ruas
             self.verificar_interconexoes()
@@ -50,7 +51,7 @@ class Individuo:
                     ):
                         intercon = interConexao(rua, rua2)
                         self.interconexoes.append(intercon)
-
+                        
     def desenhar(self, tela):
         # Desenha as ruas do indivíduo
         for rua in self.ruas:
