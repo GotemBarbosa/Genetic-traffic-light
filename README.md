@@ -2,12 +2,12 @@
 
 Trabalho desenvolvido para ser apresentado na disciplina SSC-0713 Sistemas Evolutivos Aplicados a Robotica.
 
-#### Integrantes do Grupo:
+#### Integrantes do Grupo
 
-Felipe Carneiro Machado
-Gabriel Barbosa dos Santos
-Renan Parpinelli Scarpin
-Vinicius Neves Gustierrez
+* Felipe Carneiro Machado
+* Gabriel Barbosa dos Santos
+* Renan Parpinelli Scarpin
+* Vinicius Neves Gustierrez
 
 #### Resumo
 
