@@ -32,9 +32,14 @@ def crossover_um_ponto(pai1, pai2):
 
     return filho1, filho2
 
+def mutacao_adaptativa(individuo, geracao_atual, max_geracoes, taxa_mutacao_base=0.1):
+    adaptacao = 1 - (geracao_atual / max_geracoes)
+    taxa_mutacao = taxa_mutacao_base * adaptacao
+    return mutacao(individuo, mutation_rate=taxa_mutacao)
+
 # MUTAÇÃO
-def mutacao(individuo, mutation_rate=0.1, base_mutation_step=5, 
-           min_open_time=1, max_open_time=120,  # Ajuste conforme necessário
+def mutacao(individuo, mutation_rate, base_mutation_step=30, 
+           min_open_time=20, max_open_time=2200,  # Ajuste conforme necessário
            min_state=0, max_state=10):
     
     for i in range(len(individuo.tempoAcumulado)):
@@ -55,7 +60,7 @@ def mutacao(individuo, mutation_rate=0.1, base_mutation_step=5,
 
 
 
-def elitismo(populacao, elite_size=TAMANHO_POPULACAO//10):
+def elitismo(populacao, elite_size=1):
     populacao_sorted = sorted(populacao, key=lambda x: x.fitness_total)
     elites = populacao_sorted[:elite_size]
     return elites
@@ -83,7 +88,10 @@ def penalizacao(individuo, index):
         return 0
     penalizacao = 0
     if individuo.semaforos[index].estado == individuo.semaforos[index + 1].estado:
-        penalizacao += 10
+        penalizacao += 800
+    
+    if individuo.semaforos[index].timer_clock < 500:
+        penalizacao += 500
     return penalizacao
 
 
@@ -120,7 +128,7 @@ def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1,
     nova_populacao = elites.copy()
 
     # Gerar novos indivíduos até preencher a população
-    while len(nova_populacao) < len(populacao_atual):
+    while len(nova_populacao) <= len(populacao_atual):
         # Seleção dos pais
         pai1 = selecao_torneio(populacao_atual, k=k_torneio)
         pai2 = selecao_torneio(populacao_atual, k=k_torneio)
@@ -138,8 +146,8 @@ def algoritmo_evolutivo(populacao_atual, elite_size=1, mutation_rate=0.1,
             filho2.open_time = pai2.open_time.copy()
 
         # Mutação
-        filho1 = mutacao(filho1, mutation_rate=mutation_rate)
-        filho2 = mutacao(filho2, mutation_rate=mutation_rate)
+        filho1 = mutacao_adaptativa(filho1, geracao_atual, max_geracoes=NUM_GERACOES)
+        filho2 = mutacao_adaptativa(filho2, geracao_atual, max_geracoes=NUM_GERACOES)
 
         # Adicionar filhos à nova população
         nova_populacao.append(filho1)

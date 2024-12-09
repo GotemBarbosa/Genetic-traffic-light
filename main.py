@@ -3,6 +3,8 @@ from classes.individuo import Individuo, Individuo_evol
 from config import *
 from classes.estatisticas import DisplayEstatisticas, Grafico, GraficoFitness
 from classes.AlgotimoGenetico import algoritmo_evolutivo, penalizacao
+import matplotlib.pyplot as plt
+
 
 '''
 TODO:
@@ -19,6 +21,13 @@ def gerar_populacao_inicial(tamanho_populacao, num_semaforos):
         populacao.append(individuo)
     return populacao
 
+plt.ion()  # Ativa o modo interativo
+fig, ax = plt.subplots()
+ax.set_title("Fitness ao longo das gerações")
+ax.set_xlabel("Gerações")
+ax.set_ylabel("Fitness")
+line, = ax.plot([], [], 'b-', label='Fitness')  # Linha para o gráfico
+ax.legend()
 
 # Iniciando o pygame
 pygame.init()
@@ -162,6 +171,14 @@ while running and geracao_atual < NUM_GERACOES:
     melhor, populacao_evol = algoritmo_evolutivo(populacao_evol, geracao_atual=geracao_atual)
     historico_fitness.append(melhor.fitness_total)  # Adicionar o fitness do melhor indivíduo ao histórico
 
+    # Atualizar o gráfico
+    line.set_xdata(range(len(historico_fitness)))
+    line.set_ydata(historico_fitness)
+    ax.relim()  # Recalcula os limites do gráfico
+    ax.autoscale_view()  # Ajusta a escala do gráfico automaticamente
+    plt.draw()  # Atualiza o desenho do gráfico
+    plt.pause(0.01)  # Dá uma pausa curta para evitar congelamento
+
     # Aplicar na população da simulação os valores da população evoluída
     for i in range(TAMANHO_POPULACAO):
         individuo = populacao[i]
@@ -175,5 +192,7 @@ while running and geracao_atual < NUM_GERACOES:
 
     geracao_atual += 1  # Incrementar o contador de gerações
 
+plt.ioff()  # Desativa o modo interativo
+plt.show()  # Mostra o gráfico final
 print("Fim da simulação")
 pygame.quit()
