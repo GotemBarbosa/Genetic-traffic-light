@@ -2,12 +2,9 @@
 
 Trabalho desenvolvido para ser apresentado na disciplina SSC-0713 Sistemas Evolutivos Aplicados a Robotica.
 
-#### Integrantes do Grupo
-
-* Felipe Carneiro Machado
-* Gabriel Barbosa dos Santos
-* Renan Parpinelli Scarpin
-* Vinicius Neves Gustierrez
+#### Link do vídeo explicando o projeto
+https://youtu.be/oU_rY-FiDd0
+Apresentação por Gabriel Barbosa dos Santos
 
 #### Resumo
 
@@ -32,3 +29,10 @@ Utilizamos cross-over uniforme, escolhendo um ponto do genoma que sera trocado e
 #### Simulacao
 
 Utilizamos pygame para ilustrar a simulacao
+
+#### Integrantes do Grupo
+
+* Felipe Carneiro Machado
+* Gabriel Barbosa dos Santos
+* Renan Parpinelli Scarpin
+* Vinicius Neves Gustierrez
