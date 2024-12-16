@@ -8,7 +8,10 @@
 
 ---
 
-![Simulação Completa](Screenshot from 2024-12-16 09-28-20.png)
+<p align="center">
+  <img src="images_rdme/main.png" alt="Descrição da imagem" width="600">
+</p>
+
 
 <p align="center">
 Este projeto explora a aplicação de <strong>algoritmos evolutivos</strong> para otimizar o <strong>tempo de abertura e fechamento de semáforos</strong> em um ambiente de simulação. Utilizando técnicas como <strong>seleção por torneio</strong>, <strong>crossover</strong> e <strong>mutação adaptativa</strong>, o sistema busca <strong>minimizar o tempo de espera</strong> dos veículos e <strong>melhorar o fluxo do trânsito</strong>.
@@ -89,18 +92,15 @@ Na lateral da tela, são exibidas métricas importantes para monitorar a simula�
 - **Carros Esperando**: Número de carros parados em cada semáforo.
 - **Tempo Aberto dos Semáforos**: O tempo em que cada semáforo permanece aberto antes de mudar de estado.
 
-> **Exemplo de Barra Lateral:**
-> (Insira uma imagem da barra lateral com métricas aqui)
+<p align="center">
+  <img src="images_rdme/stats.png" alt="Descrição da imagem" width="200">
+</p>
+
 
 #### Gráfico de Fitness
 Um gráfico é gerado ao longo da simulação, apresentando a evolução do **fitness** das gerações. Esse gráfico ajuda a visualizar a eficiência dos indivíduos otimizados:
 - **Eixo X**: Representa o número da geração.
 - **Eixo Y**: Representa o valor do fitness (quanto menor, melhor).
-
-> **Exemplo de Gráfico de Fitness:**
-> (Insira uma imagem do gráfico aqui)
-
-Esses recursos fornecem uma visão detalhada do progresso do algoritmo evolutivo e o impacto das mudanças nos semáforos no tráfego de veículos.
 
 ---
 ## Algoritmo Evolutivo 📌  
@@ -154,15 +154,31 @@ Esses recursos fornecem uma visão detalhada do progresso do algoritmo evolutivo
 ### Gráfico de Fitness:
 Durante a execução, um gráfico interativo é exibido, mostrando a evolução do **fitness** ao longo das gerações.
 
-![Exemplo de Simulação](Screenshot from 2024-12-16 09-28-20.png)
+![Grafico](images_rdme/graf.png)
 
-Por meio deste gráfico, é possível analisar, ao longo das gerações, a minimização do valor do fitness do melhor indivíduo. É valido ressaltar ainda que a** geração dos veículos** que transitam pelas ruas é **realizada de forma aleatória**, fazendo com que **o melhor indivíduo de uma dada geração não necessariamente seja o melhor indivíduo da próxima geração**.
+Por meio deste gráfico, é possível analisar, ao longo das gerações, a minimização do valor do fitness do melhor indivíduo. É valido ressaltar ainda que a **geração dos veículos** que transitam pelas ruas é **realizada de forma aleatória**, fazendo com que **o melhor indivíduo de uma dada geração não necessariamente seja o melhor indivíduo da próxima geração**.
+
+---
+
+### Conclusões:
+
+1. **Estabilização do Fitness**  
+   - É possível notar que o valor de **fitness estabiliza** em uma determinada faixa depois de algumas gerações.  
+   - Isso ocorre porque o algoritmo encontra um **mínimo local** e, a partir desse ponto, as melhorias dependem das **condições aleatórias** introduzidas pela mutação e geração de veículos.
+
+2. **Complexidade da Independência entre Semáforos**  
+   - A abordagem adotada, onde cada semáforo é tratado de forma **independente**, adiciona uma **complexidade maior** ao problema.  
+   - Essa independência requer a **sincronização manual entre semáforos** de uma mesma intersecção para otimizar o fluxo de veículos.  
+   - Essa característica reflete melhor a realidade, mas torna o problema mais difícil de resolver.
+
+3. **Fator Aleatório na Simulação**  
+   - A presença de **fatores aleatórios** na simulação, como a geração de veículos, adiciona variação ao problema e torna a convergência menos estável.  
+   - Embora a **remoção do fator aleatório** possa estabilizar a convergência do algoritmo, isso **não representaria um cenário realista** de tráfego.
 
 ---
 
 ### Link do vídeo explicando o projeto 🎥  
-[Assista aqui]([https://youtu.be/oU_rY-FiDd0])
-
+[Assista aqui](https://youtu.be/oU_rY-FiDd0)
 Apresentação por Gabriel Barbosa dos Santos
 
 ---
@@ -181,7 +197,7 @@ Este projeto está sob a licença MIT.
 
 | Nome Completo                | Número USP       | GitHub                           |
 |------------------------------|------------------|----------------------------------|
-| Felipe Carneiro Machado      | **XXXXX**        | [GitHub](https://github.com/XXX) |
+| Felipe Carneiro Machado      | **14569373**        | [GitHub](https://github.com/XXX) |
 | Gabriel Barbosa dos Santos   | **XXXXX**        | [GitHub](https://github.com/XXX) |
-| Renan Parpinelli Scarpin     | **XXXXX**        | [GitHub](https://github.com/XXX) |
-| Vinicius Neves Gustierrez    | **XXXXX**        | [GitHub](https://github.com/XXX) |
+| Renan Parpinelli Scarpin     | **14712188**        | [GitHub](https://github.com/XXX) |
+| Vinicius Neves Gustierrez    | **14749363**        | [GitHub](https://github.com/XXX) |
