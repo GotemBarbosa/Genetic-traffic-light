@@ -197,7 +197,7 @@ Este projeto está sob a licença MIT.
 
 | Nome Completo                | Número USP       | GitHub                           |
 |------------------------------|------------------|----------------------------------|
-| Felipe Carneiro Machado      | **14569373**        | [GitHub](https://github.com/XXX) |
-| Gabriel Barbosa dos Santos   | **XXXXX**        | [GitHub](https://github.com/XXX) |
-| Renan Parpinelli Scarpin     | **14712188**        | [GitHub](https://github.com/XXX) |
-| Vinicius Neves Gustierrez    | **14749363**        | [GitHub](https://github.com/XXX) |
+| Felipe Carneiro Machado      | **14569373**        | [GitHub](https://github.com/FelipeCarneiroMachado) |
+| Gabriel Barbosa dos Santos   | **XXXXX**           | [GitHub](https://github.com/GotemBarbosa) |
+| Renan Parpinelli Scarpin     | **14712188**        | [GitHub](https://github.com/RenanScarpin) |
+| Vinicius Neves Gustierrez    | **14749363**        | [GitHub](https://github.com/Vinicius-GN) |
